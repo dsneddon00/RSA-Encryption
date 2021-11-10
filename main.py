@@ -73,10 +73,70 @@ class RSA:
         r = (p - 1) * (q - 1)
         k = n - 1300
 
+        l = greatestCommonFactor(r, k)
+
+        while l != 1:
+            k = k + 2
+            l = greatestCommonFactor(r, k)
+
+        e = k
+
+        # private key
+        d = inverseMod(e, r)
+
+        fout = open("public.txt", "w")
+        fout.write(str(n) + "\n")
+        fout.write(str(e))
+        f.close()
+
+        fout = open("private.txt", "w")
+        fout.write(str(n) + "\n")
+        fout.write(str(d))
+        f.close()
+
 
         return
 
     def Encrypt(inputFileName, outputFileName):
+        # reading in binary mode
+        fin = open(inputFileName, "rb")
+        ptb = fin.read()
+        pt = ptb.decode("utf-8")
+
+        counter = 0
+        fullList = []
+
+        for i in range(len(pt)):
+            counter += 1
+            if(len(str(ALPHABET_INDEX[pt[i]])) <= 2):
+                fullList.append(ALPHABET_INDEX[pt[i]])
+            elif counter == 2:
+                x = ALPHABET_INDEX[pt[i - 1]]
+                fullList.append(int(str(x) + str(ALPHABET_INDEX[pt[i]])))
+                fullList.remove(x)
+                counter = 0
+            else:
+                fullList.append(ALPHABET_INDEX[pt[i]])
+        fin.close()
+
+        fin = open('public.txt', 'r')
+        lines = fin.readlines()
+        n = lines[0].strip()
+        e = lines[1].strip()
+        out = []
+
+        for i in range(len(lst)):
+            c = pow(int(lst[i]), int(e), int(n))
+            out.append(c)
+        fin.close()
+
+        fout = open(outputFileName, "wb")
+        for i in range(len(out)):
+            line = str(output[i]) + "$"
+            fout.write(line.encode("utf-8"))
+        fout.close()
+
+
         return
 
     def Decrypt(inputFileName, outputFileName):
