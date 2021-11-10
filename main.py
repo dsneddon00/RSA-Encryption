@@ -140,6 +140,49 @@ class RSA:
         return
 
     def Decrypt(inputFileName, outputFileName):
+        fin = open(inputFileName, "rb")
+        ptb = fin.read()
+        pt = ptb.decode("utf-8")
+        fullList = []
+        fullList = [s.replace("$", ",") for s in pt]
+
+        x = ""
+
+        for i in range(len(fullList)):
+            x += str(fullList[i])
+        x = x[:-1]
+        x = x.split(",")
+        fin.close()
+
+
+        fin = open("private.txt", "r")
+        lines = fin.readlines()
+        n = lines[0].strip()
+        d = lines[1].strip()
+
+        out = []
+        outF = []
+
+        for i in range(len(x)):
+            m = pow(int(x[i]), int(d), int(n))
+            out.append(m)
+        finalOut = []
+
+        for i in range(len(out)):
+            outF.append(str(out[i]))
+
+        for i in range(len(outF)):
+            finalOut.append(str(ALPHABET[int(outF[i]) - 1]))
+
+        fin.close()
+
+        fout = open(outputFileName, "wb")
+        for i in range(len(finalOut)):
+            line = str(finalOut[i])
+            fout.write(line.encode("utf-8"))
+        fout.close()
+
+
         return
 
 
@@ -169,6 +212,10 @@ def inverseMod(x, m):
 
 
 def main():
+    sampleRSA = RSA()
+
+    sampleRSA.GenerateKeys("testing", "testingtwo")
+    
     return
 
 
