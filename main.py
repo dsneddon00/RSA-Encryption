@@ -2,6 +2,9 @@
 import math
 import random
 import primeMiller
+from math import gcd as bltinGCD
+import sys
+import os
 
 
 '''
@@ -28,6 +31,12 @@ import primeMiller
 ALPHABET = ".,?! \t\n\rabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 ALPHABET_INDEX = {a: i for i, a in enumerate(ALPHABET, 1)}
 
+letter = ['a', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+          'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+
+
+public = "public.txt"
+private = "private.txt"
 #ASCII_MIN = 65;
 
 class RSA:
@@ -35,7 +44,49 @@ class RSA:
     def __init__(self):
         return
 
-    def GenerateKeys(longOne, longTwo):
+    def GenerateKeys(self, longOne, longTwo):
+        p = makePorQ(base26LetterToBase10(longOne.lower()))
+
+        q = makePorQ(base26LetterToBase10(longOne.lower()))
+
+        n = p * q
+
+        r = (p - 1) * (q - 1)
+
+        ok = False
+        while ok != True:
+            while ok != True or tmp > n:
+                tmp = randomPower(398)
+                ok = isCoPrime(tmp, r)
+            e = tmp
+            d = inverseMod(e, r)
+            if d == False:
+                ok = False
+        print(f"len(p) : {len(str(p))}")
+        print(f"len(q) : {len(str(q))}")
+        print(f"len(n) : {len(str(n))}")
+        print(f"len(r) : {len(str(r))}")
+        print(f"len(e) : {len(str(e))}")
+        print(f"len(d) : {len(str(d))}")
+
+        if os.path.exists(public):
+            os.remove(public)
+
+        puF = open(public, "w")
+        puF.write(str(n) + "\n")
+        puF.write(str(e) + "\n")
+        puF.close()
+
+        if os.path.exists(private):
+            os.remove(private)
+
+        prF = open(private, "w")
+        prF.write(str(n) + "\n")
+        prF.write(str(d) + "\n")
+        prF.close()
+
+
+        '''
         x = 0
         y = 0
         for c in longOne.upper():
@@ -87,12 +138,13 @@ class RSA:
         fout = open("public.txt", "w")
         fout.write(str(n) + "\n")
         fout.write(str(e))
-        f.close()
+        fout.close()
 
         fout = open("private.txt", "w")
         fout.write(str(n) + "\n")
         fout.write(str(d))
-        f.close()
+        fout.close()
+        '''
 
 
         return
@@ -186,13 +238,75 @@ class RSA:
         return
 
 
-#def base10ToAlphabet(number):
+def base10ToLetter(number):
+    if(number <= 0):
+        # invalid
+        return ""
+    elif(number <= 26):
+        return chr(96 + number)
+    else:
+        #run recursively
+        return base10ToBase26Letter(int((number - 1) / 26)) + chr(97 + (num - 1) % 26)
+
+def alphabetToBase10(statement, alphabet):
+    total = 0
+    for s in statement:
+        counter = alphabet.find(s)
+        if counter != -1:
+            #thus being valid
+            counter *= len(alphabet)
+            counter += i
+
+def base10ToAlphabet(number, alphabet):
+    result = []
+    n = num
+    base = len(alphabet)
+    c = 0
+    while(n != 0):
+        lst.insert(c, n % base)
+        c = c // base
+        c += 1
+
+    # flip our list
+    statement = ""
+    result.reverse()
+
+    for item in result:
+        statement += alphabet[a]
+
+    return statement
+
+def randomPower(x):
+    start = 10**(x - 1)
+    end = (10**x) - 1
+    return random.randint(start, end)
 
 
 def greatestCommonFactor(x, y):
     while(y):
         x, y = y, x % y
     return x
+
+def isCoPrime(x, y):
+    m = min(x, y)
+
+    for i in range(1, m + 1):
+        if(x % i == 0 and y % i == 0):
+            gcf = i
+        if(gcf == 1):
+            return True
+        else:
+            return False
+
+def base26LetterToBase10(statement):
+    statement = statement.lower()
+    if statement == " " or len(statement) == 0:
+        return 0
+    if len(statement) == 1:
+        # print(ord(string))
+        return ord(statement)-96
+    else:
+        return base26LetterToBase10(statement[1:]) + (26 ** (len(statement)-1)) * (ord(statement[0]) - 96)
 
 # also known as egcd
 def euclidean(x, y):
@@ -206,16 +320,48 @@ def euclidean(x, y):
 def inverseMod(x, m):
     g, a, b = euclidean(x, m)
     if g != 1:
-        raise Exception("No Inverse Mod")
+        return False
     else:
         return a % m
 
+def invertInt(x):
+
+    reverse = 0
+    while(x > 0):
+        d = x % 10
+        reverse = reverse * 10 + d
+        x = x // 10
+    return reverse
+
+def coPrime2(x, y):
+    return (bltinGCD(x, y) == 1)
+
+def makePorQ(number):
+
+    if len(str(number)) < 200:
+        print("the text is too short!\n")
+        print(number)
+        print(10**200)
+        sys.exit(1)
+
+    cut = number % pow(10, 200)
+
+    if cut % 2 == 0:
+        cut += 1
+
+    while(primeMiller.isPrime(cut, 20) == False):
+        cut += 2
+
+    return cut
 
 def main():
     sampleRSA = RSA()
 
-    sampleRSA.GenerateKeys("testing", "testingtwo")
-    
+    testing = "uibfasdoifubaoiusfdbiousadbfpiadubfoiaubfoiuabdoifubasdfoiubadfiobdfoiuadfoiubadfidsuabfoiadsubfaiodubdsafasdfafnoiujwasidufbiusbfdioaubfoidubfoiubdsfoiabudfoiuabdfiosbusaouidfs"
+    testingTwo = "jbfoigboiadoidajnfijawndfioabwdiofdsufihsnoifjbeoijfbodjbdoifuabdifbaidfbaioudfboiasjbdfiuawbfeiowbfoejbfoiqeubfoiuqebofiuqebfasbdufbsiuadfubioaufbdoiafubdosifabuoisudbfoiasudbfoiadusbfoiausbdfioausbdfoisaubdf"
+
+    sampleRSA.GenerateKeys(testing, testingTwo)
+
     return
 
 
