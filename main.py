@@ -44,46 +44,35 @@ class RSA:
     def __init__(self):
         return
 
-    def GenerateKeys(self, longOne, longTwo):
-        p = makePorQ(base26LetterToBase10(longOne.lower()))
-
-        q = makePorQ(base26LetterToBase10(longOne.lower()))
-
+    def GenerateKeys(self, loneOne, loneTwo):
+        p = makePorQ(base26LetterToBase10(loneOne.lower()))
+        q = makePorQ(base26LetterToBase10(loneTwo.lower()))
         n = p * q
-
         r = (p - 1) * (q - 1)
-
         ok = False
         while ok != True:
             while ok != True or tmp > n:
-                tmp = randomPower(398)
+                tmp = randomPower(400)
                 ok = isCoPrime(tmp, r)
             e = tmp
+
             d = inverseMod(e, r)
             if d == False:
                 ok = False
-        print(f"len(p) : {len(str(p))}")
-        print(f"len(q) : {len(str(q))}")
-        print(f"len(n) : {len(str(n))}")
-        print(f"len(r) : {len(str(r))}")
-        print(f"len(e) : {len(str(e))}")
-        print(f"len(d) : {len(str(d))}")
 
         if os.path.exists(public):
             os.remove(public)
 
-        puF = open(public, "w")
-        puF.write(str(n) + "\n")
-        puF.write(str(e) + "\n")
-        puF.close()
-
+        pubF = open(public, "w")
+        pubF.write(str(n) + "\n")
+        pubF.write(str(e) + "\n")
+        pubF.close()
         if os.path.exists(private):
             os.remove(private)
-
-        prF = open(private, "w")
-        prF.write(str(n) + "\n")
-        prF.write(str(d) + "\n")
-        prF.close()
+        priF = open(private, "w")
+        priF.write(str(n) + "\n")
+        priF.write(str(d) + "\n")
+        priF.close()
 
 
         '''
@@ -149,50 +138,69 @@ class RSA:
 
         return
 
-    def Encrypt(inputFileName, outputFileName):
-        # reading in binary mode
-        fin = open(inputFileName, "rb")
-        ptb = fin.read()
-        pt = ptb.decode("utf-8")
+    def Encrypt(self, inputFileName, outputFileName):
+        print("Start Encrypt\n")
+        pubF = open(public, "r") if os.path.exists(
+            public) else sys.exit(1)
+        lines = pubF.readlines()
+        n = int(lines[0].replace("\n", ''))
+        e = int(lines[1].replace("\n", ''))
+        pubF.close()
+        iFile = open(inputFileName, "rb") if os.path.exists(
+            inputFileName) else sys.exit(1)
+        if os.path.exists(outputFileName):
+            os.remove(outputFileName)
+        oFile = open(outputFileName, "wb")
+        result = []
+        for ptBinaray in iter(lambda: iFile.read(200), b''):
+            pt = ptBinaray.decode("utf-8")
+            alphabet = ".,?! \t\n\rabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            num = alphabetToBase10(pt, alphabet)
+            c = pow(num, e, n)
+            block = base10ToAlphabet(c, alphabet) + "$"
+            result.append(block)
 
-        counter = 0
-        fullList = []
+        oFile.write("".join(result).encode("utf-8"))
+        iFile.close()
+        oFile.close()
 
-        for i in range(len(pt)):
-            counter += 1
-            if(len(str(ALPHABET_INDEX[pt[i]])) <= 2):
-                fullList.append(ALPHABET_INDEX[pt[i]])
-            elif counter == 2:
-                x = ALPHABET_INDEX[pt[i - 1]]
-                fullList.append(int(str(x) + str(ALPHABET_INDEX[pt[i]])))
-                fullList.remove(x)
-                counter = 0
-            else:
-                fullList.append(ALPHABET_INDEX[pt[i]])
-        fin.close()
+    def Decrypt(self, inputFileName, outputFileName):
+        print("Start Decrypt\n")
 
-        fin = open('public.txt', 'r')
-        lines = fin.readlines()
-        n = lines[0].strip()
-        e = lines[1].strip()
-        out = []
+        priF = open(private, "r") if os.path.exists(
+            private) else sys.exit(1)
+        lines = priF.readlines()
+        n = int(lines[0].replace("\n", ''))
+        d = int(lines[1].replace("\n", ''))
+        priF.close()
 
-        for i in range(len(lst)):
-            c = pow(int(lst[i]), int(e), int(n))
-            out.append(c)
-        fin.close()
+        iFile = open(inputFileName, "rb") if os.path.exists(
+            inputFileName) else sys.exit(1)
 
-        fout = open(outputFileName, "wb")
-        for i in range(len(out)):
-            line = str(output[i]) + "$"
-            fout.write(line.encode("utf-8"))
-        fout.close()
+        if os.path.exists(outputFileName):
+            os.remove(outputFileName)
+        oFile = open(outputFileName, "wb")
+
+        encryptedBlocks = iFile.read().decode("utf-8").split("$")
+        alphabet = ".,?! \t\n\rabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        result = []
+        for block in encryptedBlocks:
+            if block != '':
+                c = alphabetToBase10(block, alphabet)
+                m = pow(c, d, n)
+                print(m)
+                text = base10ToAlphabet(m, alphabet)
+                print(text)
+                result.append(text)
+
+        oFile.write("".join(result).encode("utf-8"))
+
+        iFile.close()
+        oFile.close()
 
 
-        return
-
-    def Decrypt(inputFileName, outputFileName):
-        fin = open(inputFileName, "rb")
+        '''
+        fin = open(inputFileNameName, "rb")
         ptb = fin.read()
         pt = ptb.decode("utf-8")
         fullList = []
@@ -228,11 +236,12 @@ class RSA:
 
         fin.close()
 
-        fout = open(outputFileName, "wb")
+        fout = open(outputFileNameName, "wb")
         for i in range(len(finalOut)):
             line = str(finalOut[i])
             fout.write(line.encode("utf-8"))
         fout.close()
+        '''
 
 
         return
@@ -246,32 +255,32 @@ def base10ToLetter(number):
         return chr(96 + number)
     else:
         #run recursively
-        return base10ToBase26Letter(int((number - 1) / 26)) + chr(97 + (num - 1) % 26)
+        return base10ToBase26Letter(int((number - 1) / 26)) + chr(97 + (number - 1) % 26)
 
 def alphabetToBase10(statement, alphabet):
-    total = 0
+    number = 0
     for s in statement:
-        counter = alphabet.find(s)
-        if counter != -1:
-            #thus being valid
-            counter *= len(alphabet)
-            counter += i
+        i = alphabet.find(s)
+        if i != -1:
+            number *= len(alphabet)
+            number += i
+    return number
 
 def base10ToAlphabet(number, alphabet):
     result = []
-    n = num
-    base = len(alphabet)
-    c = 0
-    while(n != 0):
-        lst.insert(c, n % base)
-        c = c // base
-        c += 1
+    q = number
+    b = len(alphabet)
+    k = 0
+    while q != 0:
+        result.insert(k, q % b)
+        # result.append(q % b)
+        q = q // b
+        k += 1
 
-    # flip our list
     statement = ""
     result.reverse()
 
-    for item in result:
+    for a in result:
         statement += alphabet[a]
 
     return statement
@@ -303,10 +312,9 @@ def base26LetterToBase10(statement):
     if statement == " " or len(statement) == 0:
         return 0
     if len(statement) == 1:
-        # print(ord(string))
-        return ord(statement)-96
+        return ord(statement) - 96
     else:
-        return base26LetterToBase10(statement[1:]) + (26 ** (len(statement)-1)) * (ord(statement[0]) - 96)
+        return base26LetterToBase10(statement[1:]) + (26 ** (len(statement) - 1)) * (ord(statement[0]) - 96)
 
 # also known as egcd
 def euclidean(x, y):
@@ -339,7 +347,7 @@ def coPrime2(x, y):
 def makePorQ(number):
 
     if len(str(number)) < 200:
-        print("the text is too short!\n")
+        print("not long enough!\n")
         print(number)
         print(10**200)
         sys.exit(1)
@@ -356,12 +364,13 @@ def makePorQ(number):
 
 def main():
     sampleRSA = RSA()
-
     testing = "uibfasdoifubaoiusfdbiousadbfpiadubfoiaubfoiuabdoifubasdfoiubadfiobdfoiuadfoiubadfidsuabfoiadsubfaiodubdsafasdfafnoiujwasidufbiusbfdioaubfoidubfoiubdsfoiabudfoiuabdfiosbusaouidfs"
     testingTwo = "jbfoigboiadoidajnfijawndfioabwdiofdsufihsnoifjbeoijfbodjbdoifuabdifbaidfbaioudfboiasjbdfiuawbfeiowbfoejbfoiqeubfoiuqebofiuqebfasbdufbsiuadfubioaufbdoiafubdosifabuoisudbfoiasudbfoiadusbfoiausbdfioausbdfoisaubdf"
-
     sampleRSA.GenerateKeys(testing, testingTwo)
-
+    sampleRSA.Encrypt("input.txt", "encrypted.txt")
+    print("\n")
+    #sampleRSA.Decrypt(input("Name of text file: "), "decrypted.txt")
+    sampleRSA.Decrypt("encrypted.txt", "decrypted.txt")
     return
 
 
