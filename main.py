@@ -52,7 +52,7 @@ class RSA:
         ok = False
         while ok != True:
             while ok != True or tmp > n:
-                tmp = randomPower(400)
+                tmp = randomPower(398)
                 ok = isCoPrime(tmp, r)
             e = tmp
 
@@ -366,11 +366,11 @@ def main():
     sampleRSA = RSA()
     testing = "uibfasdoifubaoiusfdbiousadbfpiadubfoiaubfoiuabdoifubasdfoiubadfiobdfoiuadfoiubadfidsuabfoiadsubfaiodubdsafasdfafnoiujwasidufbiusbfdioaubfoidubfoiubdsfoiabudfoiuabdfiosbusaouidfs"
     testingTwo = "jbfoigboiadoidajnfijawndfioabwdiofdsufihsnoifjbeoijfbodjbdoifuabdifbaidfbaioudfboiasjbdfiuawbfeiowbfoejbfoiqeubfoiuqebofiuqebfasbdufbsiuadfubioaufbdoiafubdosifabuoisudbfoiasudbfoiadusbfoiausbdfioausbdfoisaubdf"
-    sampleRSA.GenerateKeys(testing, testingTwo)
-    sampleRSA.Encrypt("input.txt", "encrypted.txt")
+    #sampleRSA.GenerateKeys(testing, testingTwo)
+    #sampleRSA.Encrypt("input.txt", "encrypted.txt")
     print("\n")
     #sampleRSA.Decrypt(input("Name of text file: "), "decrypted.txt")
-    sampleRSA.Decrypt("encrypted.txt", "decrypted.txt")
+    sampleRSA.Decrypt("DerekEncrypted.txt", "Derekdecrypted.txt")
     return
 
 
